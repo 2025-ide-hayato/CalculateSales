@@ -44,42 +44,43 @@ public class CalculateSales {
 		File[] files = new File(args[0]).listFiles();
 		List<File> rcdFiles = new ArrayList<File>();
 
-		for(int i = 0 ;i<files.length;i++) {
+		for (int i = 0; i < files.length; i++) {
 			String fileName = files[i].getName();
 
-			if(fileName.matches("^[0-9]{8}(.)rcd$")) {
+			if (fileName.matches("^[0-9]{8}.rcd$")) {
 				rcdFiles.add(files[i]);
 			}
 		}
 
-		for(int j = 0;j<rcdFiles.size();j++) {
+		for (int j = 0; j < rcdFiles.size(); j++) {
 			BufferedReader br = null;
 
 			try {
-				File  rcdFile = new File(args[0],rcdFiles.get(j).getName());
-				FileReader fr  = new FileReader(rcdFile);
+				File rcdFile = new File(args[0], rcdFiles.get(j).getName());
+				FileReader fr = new FileReader(rcdFile);
 				br = new BufferedReader(fr);
 				String line;
-				List<String> rl = new ArrayList<String>();
+				List<String> rcdContents = new ArrayList<String>();
 
-				while((line =br.readLine()) != null){
-				rl.add(line);
+				while ((line = br.readLine()) != null) {
+					rcdContents.add(line);
 				}
-				long fileSale = Long.parseLong(rl.get(1));
-				long sumSale = branchSales.get(rl.get(0)) + fileSale;
+				long fileSale = Long.parseLong(rcdContents.get(1));
+				long sumSale = branchSales.get(rcdContents.get(0)) + fileSale;
 
-				branchSales.replace(rl.get(0),sumSale);
+				branchSales.replace(rcdContents.get(0), sumSale);
 
-			}catch(IOException e) {
+			} catch (IOException e) {
 				System.out.println(UNKNOWN_ERROR);
-			}finally {
+				return;
+			} finally {
 				if (br != null) {
 					try {
 						// ファイルを閉じる
 						br.close();
 					} catch (IOException e) {
 						System.out.println(UNKNOWN_ERROR);
-						return ;
+						return;
 					}
 				}
 
@@ -157,21 +158,21 @@ public class CalculateSales {
 		BufferedWriter bw = null;
 
 		try {
-			File resultFile = new File(path,fileName);
+			File resultFile = new File(path, fileName);
 			FileWriter fw = new FileWriter(resultFile);
 			bw = new BufferedWriter(fw);
 
-			for(String key : branchNames.keySet()) {
+			for (String key : branchNames.keySet()) {
 				String outName = branchNames.get(key);
 				long outPrice = branchSales.get(key);
 
 				bw.write(key + "," + outName + "," + outPrice);
 				bw.newLine();
 			}
-		}catch (IOException e) {
+		} catch (IOException e) {
 			System.out.println(UNKNOWN_ERROR);
-		}finally {
-
+			return false;
+		} finally {
 			if (bw != null) {
 				try {
 					// ファイルを閉じる
@@ -182,9 +183,6 @@ public class CalculateSales {
 				}
 			}
 		}
-
-
-
 		return true;
 	}
 }
